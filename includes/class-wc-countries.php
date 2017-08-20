@@ -152,6 +152,26 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get the base address (first line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address() {
+		$base_address = get_option( 'woocommerce_store_address', '' );
+		return apply_filters( 'woocommerce_countries_base_address', $base_address );
+	}
+
+	/**
+	 * Get the base address (second line) for the store.
+	 * @since 3.1.1
+	 * @return string
+	 */
+	public function get_base_address_2() {
+		$base_address_2 = get_option( 'woocommerce_store_address_2', '' );
+		return apply_filters( 'woocommerce_countries_base_address_2', $base_address_2 );
+	}
+
+	/**
 	 * Get the base country for the store.
 	 * @return string
 	 */
@@ -171,18 +191,22 @@ class WC_Countries {
 
 	/**
 	 * Get the base city for the store.
+	 * @version 3.1.1
 	 * @return string
 	 */
 	public function get_base_city() {
-		return apply_filters( 'woocommerce_countries_base_city', '' );
+		$base_city = get_option( 'woocommerce_store_city', '' );
+		return apply_filters( 'woocommerce_countries_base_city', $base_city );
 	}
 
 	/**
 	 * Get the base postcode for the store.
+	 * @since 3.1.1
 	 * @return string
 	 */
 	public function get_base_postcode() {
-		return apply_filters( 'woocommerce_countries_base_postcode', '' );
+		$base_postcode = get_option( 'woocommerce_store_postcode', '' );
+		return apply_filters( 'woocommerce_countries_base_postcode', $base_postcode );
 	}
 
 	/**
@@ -393,16 +417,16 @@ class WC_Countries {
 						foreach ( $states as $state_key => $state_value ) :
 						echo '<option value="' . esc_attr( $key ) . ':' . $state_key . '"';
 
-						if ( $selected_country == $key && $selected_state == $state_key ) {
+						if ( $selected_country === $key && $selected_state === $state_key ) {
 							echo ' selected="selected"';
-							}
+						}
 
 						echo '>' . $value . ' &mdash; ' . ( $escape ? esc_js( $state_value ) : $state_value ) . '</option>';
 						endforeach;
 					echo '</optgroup>';
 				else :
 					echo '<option';
-					if ( $selected_country == $key && '*' == $selected_state ) {
+					if ( $selected_country === $key && '*' === $selected_state ) {
 						echo ' selected="selected"';
 					}
 					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_js( $value ) : $value ) . '</option>';
@@ -659,10 +683,10 @@ class WC_Countries {
 						'required' => false,
 						'hidden'   => true,
 					),
-                    'state' => array(
-                        'required' => false,
+					'state' => array(
+						'required' => false,
 					),
-                ),
+				),
 				'AF' => array(
 					'state' => array(
 						'required' => false,
@@ -1113,6 +1137,9 @@ class WC_Countries {
 		$address_fields = array();
 
 		foreach ( $fields as $key => $value ) {
+			if ( 'state' === $key ) {
+				$value['country_field'] = $type . 'country';
+			}
 			$address_fields[ $type . $key ] = $value;
 		}
 

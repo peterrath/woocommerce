@@ -184,7 +184,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
 		$pages    = $data['pages'];
-		$this->assertEquals( 4, count( $pages ) );
+		$this->assertEquals( 5, count( $pages ) );
 	}
 
 	/**
@@ -223,11 +223,10 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-
 		$this->assertContains( array(
 			'id'          => 'reset_tracking',
-			'name'        => 'Reset usage tracking settings',
-			'action'      => 'Reset usage tracking settings',
+			'name'        => 'Reset usage tracking',
+			'action'      => 'Reset',
 			'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
 			'_links'      => array(
 				'item' => array(

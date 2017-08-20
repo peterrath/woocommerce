@@ -216,7 +216,7 @@ class WC_Checkout {
 			if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 				$this->fields['account']['account_password'] = array(
 					'type'         => 'password',
-					'label'        => __( 'Account password', 'woocommerce' ),
+					'label'        => __( 'Create account password', 'woocommerce' ),
 					'required'     => true,
 					'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
 				);
@@ -313,12 +313,12 @@ class WC_Checkout {
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ]  : $data['payment_method'] );
-			$order->set_shipping_total( WC()->cart->shipping_total );
-			$order->set_discount_total( WC()->cart->get_cart_discount_total() );
-			$order->set_discount_tax( WC()->cart->get_cart_discount_tax_total() );
-			$order->set_cart_tax( WC()->cart->tax_total );
-			$order->set_shipping_tax( WC()->cart->shipping_tax_total );
-			$order->set_total( WC()->cart->total );
+			$order->set_shipping_total( WC()->cart->get_shipping_total() );
+			$order->set_discount_total( WC()->cart->get_discount_total() );
+			$order->set_discount_tax( WC()->cart->get_discount_tax() );
+			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
+			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
+			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
 			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
@@ -351,7 +351,7 @@ class WC_Checkout {
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
 			/**
-			 * Filter hook to get inital item object.
+			 * Filter hook to get initial item object.
 			 * @since 3.1.0
 			 */
 			$item                       = apply_filters( 'woocommerce_checkout_create_order_line_item_object', new WC_Order_Item_Product(), $cart_item_key, $values, $order );
@@ -562,7 +562,7 @@ class WC_Checkout {
 
 				switch ( $type ) {
 					case 'checkbox' :
-						$value = (int) isset( $_POST[ $key ] );
+						$value = isset( $_POST[ $key ] ) ? 1 : '';
 						break;
 					case 'multiselect' :
 						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( $_POST[ $key ] ) ) : '';
@@ -576,9 +576,6 @@ class WC_Checkout {
 				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
-
-				// BW compatibility.
-				$this->legacy_posted_data[ $key ] = $data[ $key ];
 			}
 		}
 
@@ -587,6 +584,9 @@ class WC_Checkout {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
 			}
 		}
+
+		// BW compatibility.
+		$this->legacy_posted_data = $data;
 
 		return $data;
 	}
@@ -655,7 +655,7 @@ class WC_Checkout {
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && sizeof( $valid_states ) > 0 ) {
-						$valid_state_values = array_flip( array_map( 'wc_strtoupper', $valid_states ) );
+						$valid_state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $valid_states ) ) );
 						$data[ $key ]       = wc_strtoupper( $data[ $key ] );
 
 						if ( isset( $valid_state_values[ $data[ $key ] ] ) ) {
@@ -663,7 +663,7 @@ class WC_Checkout {
 							$data[ $key ] = $valid_state_values[ $data[ $key ] ];
 						}
 
-						if ( ! in_array( $data[ $key ], array_keys( $valid_states ) ) ) {
+						if ( ! in_array( $data[ $key ], $valid_state_values ) ) {
 							/* translators: 1: state field 2: valid states */
 							$errors->add( 'validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . $field_label . '</strong>', implode( ', ', $valid_states ) ) );
 						}

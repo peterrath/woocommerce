@@ -211,6 +211,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					<input type="hidden" name="page" value="<?php echo ( ! empty( $_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : ''; ?>" />
 					<input type="hidden" name="tab" value="<?php echo ( ! empty( $_GET['tab'] ) ) ? esc_attr( $_GET['tab'] ) : ''; ?>" />
 					<input type="hidden" name="report" value="<?php echo ( ! empty( $_GET['report'] ) ) ? esc_attr( $_GET['report'] ) : ''; ?>" />
+					<?php wp_nonce_field( 'custom_range', 'wc_reports_nonce', false ); ?>
 				</div>
 			</form>
 		</div>
@@ -244,7 +245,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					foreach ( $top_sellers as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . $product->order_item_qty . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'count' ) . '</td>
 						</tr>';
 					}
@@ -292,7 +293,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					foreach ( $top_freebies as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . $product->order_item_qty . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'count' ) . '</td>
 						</tr>';
 					}
@@ -332,7 +333,7 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					foreach ( $top_earners as $product ) {
 						echo '<tr class="' . ( in_array( $product->product_id, $this->product_ids ) ? 'active' : '' ) . '">
 							<td class="count">' . wc_price( $product->order_item_total ) . '</td>
-							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . get_the_title( $product->product_id ) . '</a></td>
+							<td class="name"><a href="' . esc_url( add_query_arg( 'product_ids', $product->product_id ) ) . '">' . esc_html( get_the_title( $product->product_id ) ) . '</a></td>
 							<td class="sparkline">' . $this->sales_sparkline( $product->product_id, 7, 'sales' ) . '</td>
 						</tr>';
 					}
@@ -386,8 +387,6 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 
 	/**
 	 * Get the main chart.
-	 *
-	 * @return string
 	 */
 	public function get_main_chart() {
 		global $wp_locale;

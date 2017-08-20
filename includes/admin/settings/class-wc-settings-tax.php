@@ -20,17 +20,12 @@ if ( ! class_exists( 'WC_Settings_Tax', false ) ) :
 class WC_Settings_Tax extends WC_Settings_Page {
 
 	/**
-	 * Setting page id.
-	 *
-	 * @var string
-	 */
-	protected $id = 'tax';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->id = 'tax';
 		$this->label = __( 'Tax', 'woocommerce' );
+
 		parent::__construct();
 	}
 
@@ -73,10 +68,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	/**
 	 * Get settings array.
 	 *
+	 * @param string $current_section
 	 * @return array
 	 */
-	public function get_settings() {
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, include( 'views/settings-tax.php' ) );
+	public function get_settings( $current_section = '' ) {
+		$settings = array();
+
+		if ( '' === $current_section ) {
+	 		$settings = include( 'views/settings-tax.php' );
+ 		}
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**
